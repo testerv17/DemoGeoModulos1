@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Demo Geomódulos — Supervisión & Ingeniería RT (2025)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Mapbox GL JS -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"></script>
+
+  <!-- Firebase v10 Modular (CDN) -->
+  <script type="module">
+    // Se carga Firebase como módulo más abajo (para mantener orden del archivo)
+  </script>
+
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0b1020;        /* fondo principal */
+      --bg-soft:#0f152a;   /* paneles */
+      --card:#131b36;
+      --text:#e8f0ff;
+      --muted:#a9b4d0;
+      --brand:#20c9ff;     /* acento cian */
+      --brand-2:#6af0ff;   /* acento cian claro */
+      --danger:#ff4d6d;    /* error */
+      --success:#33e2a0;   /* ok */
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;
+      background:
+        radial-gradient(1200px 1200px at 85% 10%, rgba(32,201,255,.12), transparent 40%),
+        radial-gradient(900px 900px at 10% 85%, rgba(106,240,255,.10), transparent 40%),
+        var(--bg);
+      color:var(--text);
+      overflow:hidden;
+    }
+    .app{
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      grid-template-rows: 72px 1fr;
+      grid-template-areas:
+        "header header"
+        "sidebar map";
+      height:100%;
+    }
+    header{
+      grid-area:header;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.04), transparent);
+      border-bottom:1px solid rgba(255,255,255,.06);
+      backdrop-filter: blur(6px);
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;
+      font-weight:800;letter-spacing:.4px;
+    }
+    .brand .logo{
+      width:38px;height:38px;border-radius:12px;
+      background: radial-gradient(circle at 30% 20%, var(--brand-2), var(--brand) 60%, #0af 100%);
+      box-shadow: inset 0 0 10px rgba(255,255,255,.2), var(--shadow);
+    }
+    .actions{display:flex;gap:10px;align-items:center}
+
+    .badge{
+      padding:6px 10px;border-radius:999px;font-size:12px;
+      color:#00222a;background:linear-gradient(90deg,var(--brand),var(--brand-2));
+      font-weight:700;box-shadow: var(--shadow);
+    }
+    .btn{
+      border:1px solid rgba(255,255,255,.10);
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.01));
+      color:var(--text); padding:10px 12px;border-radius:12px;
+      font-weight:600; cursor:pointer; transition:.2s; backdrop-filter:blur(4px);
+    }
+    .btn:hover{transform: translateY(-1px); border-color: rgba(32,201,255,.7)}
+    .btn.primary{
+      background: linear-gradient(90deg, var(--brand), var(--brand-2));
+      color:#00222a; border:none;
+    }
+
+    aside{
+      grid-area:sidebar; padding:16px; overflow:auto;
+      background: linear-gradient(180deg, rgba(255,255,255,.04), transparent);
+      border-right:1px solid rgba(255,255,255,.06);
+    }
+    .panel{
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:var(--radius); padding:14px; margin-bottom:14px;
+      box-shadow: var(--shadow);
+    }
+    .panel h3{margin:0 0 12px; font-size:15px; color:#dbe6ff}
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    select, input[type="text"], input[type="email"], input[type="password"], textarea{
+      width:100%; padding:10px 12px; border-radius:12px; outline:none;
+      border:1px solid rgba(255,255,255,.12);
+      background:#0f1734; color:var(--text);
+      transition:.2s;
+    }
+    select:focus, input:focus, textarea:focus{border-color: var(--brand)}
+    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+    .tiny{font-size:12px;color:var(--muted)}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;
+      background:#0e1630;border:1px solid rgba(255,255,255,.08);font-size:12px;color:#cfe5ff
+    }
+
+    /* Map */
+    #map{ grid-area:map; position:relative }
+    #map canvas{ outline:none }
+    .map-toolbar{
+      position:absolute; top:14px; left:50%; transform:translateX(-50%);
+      display:flex; gap:10px; z-index:10;
+    }
+    .map-toolbar .btn{padding:8px 12px}
+    .style-switcher{
+      position:absolute; top:14px; right:14px; z-index:10;
+      display:flex; gap:8px; flex-wrap:wrap; max-width:46vw; justify-content:flex-end;
+    }
+    .chip{
+      padding:7px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.10);
+      background:#0d1530; cursor:pointer; font-size:12px; color:#d9e6ff
+    }
+    .chip.active{ border-color: var(--brand); color:#00222a; background:linear-gradient(90deg,var(--brand),var(--brand-2))}
+
+    /* Popup content */
+    .popup-content{min-width:240px}
+    .popup-title{font-weight:700;margin:0 0 6px}
+    .popup-sub{color:#aac2ff; margin:0 0 10px; font-size:12px}
+    .popup-actions{display:flex;flex-direction:column; gap:8px}
+    .link{
+      display:flex; align-items:center; gap:8px;
+      padding:8px 10px; border-radius:10px; background:#0e1630; border:1px solid rgba(255,255,255,.08);
+      text-decoration:none; color:#dff3ff; font-size:13px;
+    }
+    .link:hover{border-color:var(--brand)}
+
+    /* Drawer */
+    .drawer{
+      position:absolute; top:0; right:0; width:420px; max-width:95vw; height:100%;
+      background: var(--bg-soft);
+      border-left:1px solid rgba(255,255,255,.08); box-shadow: var(--shadow);
+      transform: translateX(100%); transition: .28s ease; z-index:12; display:flex; flex-direction:column;
+    }
+    .drawer.open{ transform: translateX(0) }
+    .drawer header{border-bottom:1px solid rgba(255,255,255,.06)}
+    .drawer .content{padding:16px; overflow:auto}
+    .doc-item{
+      padding:12px;border:1px solid rgba(255,255,255,.08); border-radius:12px; margin-bottom:10px;
+      background:#0f1834
+    }
+    .doc-item a{color:#aee9ff; text-decoration:none}
+    .doc-item a:hover{text-decoration:underline}
+
+    /* Modal */
+    .modal{
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:20;
+      background:rgba(5,8,18,.55); backdrop-filter: blur(4px);
+    }
+    .modal.show{display:flex}
+    .modal .box{
+      width:min(520px, 92vw); background:var(--bg-soft); border:1px solid rgba(255,255,255,.08);
+      border-radius:18px; padding:16px; box-shadow: var(--shadow)
+    }
+    .split{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+
+    /* Role chips */
+    .role-tag{font-weight:700}
+    .role-sup1{color:#ffe066}
+    .role-sup2{color:#9ae66e}
+    .role-eng{color:#7ee7ff}
+
+    /* Footer note */
+    .footer-note{position:absolute; bottom:10px; left:12px; font-size:11px; color:#97a8cc}
+    .error{color:var(--danger)}
+    .ok{color:var(--success)}
+    @media (max-width: 980px){
+      .app{grid-template-columns:1fr; grid-template-areas:
+        "header" "map"; }
+      aside{display:none}
+    }
+
+    /* ========= NUEVO: marcador con imagen book1.png ========= */
+    .marker-book {
+      width: 54px;
+      height: 54px;
+      background-image: url('book1.png');
+      background-size: cover;
+      background-position: center;
+      border-radius: 50%;
+      box-shadow: 0 0 0 3px rgba(32,201,255,.25), 0 6px 14px rgba(0,0,0,.35);
+      border: 1px solid rgba(255,255,255,.9);
+      cursor:pointer;
+    }
+
+    /* ========= NUEVO: tabs PDF para drawer ========= */
+    .tabs{display:flex;gap:8px;margin-bottom:10px}
+    .tab-btn{flex:1;padding:8px 10px;border-radius:10px;text-align:center;background:#0d1530;color:#dff3ff;border:1px solid rgba(255,255,255,.1);cursor:pointer}
+    .tab-btn.active{background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#00222a;font-weight:700}
+    .tab-pane{display:none}
+    .tab-pane.active{display:block}
+    .pdf-frame{width:100%;height:420px;border:none;border-radius:12px;background:#000}
+    .ext-btn{display:block;margin-top:10px;background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#00222a;font-weight:800;text-align:center;padding:10px;border-radius:12px;text-decoration:none}
+
+    /* ========= NUEVO: Banner de rol ========= */
+    .role-banner{
+      position:absolute;top:12px;left:16px;z-index:30;
+      background:linear-gradient(90deg,var(--brand),var(--brand-2));
+      color:#00222a;font-weight:800;border-radius:999px;padding:6px 12px;box-shadow:var(--shadow)
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <div style="font-size:15px;opacity:.9">Demo Geomódulos</div>
+          <div class="tiny">Supervisión • Biblioteca • USP • Ingeniería en Tiempo Real</div>
+        </div>
+      </div>
+      <div class="actions">
+        <span id="roleChip" class="pill">Rol: <strong class="role-tag" id="roleName">Demo</strong></span>
+        <button class="btn" id="demoSwitch">Demo mode: <span id="demoState">ON</span></button>
+        <button class="btn" id="btnLogin">Iniciar sesión</button>
+        <button class="btn" id="btnLogout" style="display:none;">Cerrar sesión</button>
+        <span class="badge">2025</span>
+      </div>
+    </header>
+
+    <aside>
+      <div class="panel">
+        <h3>Seleccionar Rol (solo demo)</h3>
+        <div class="row">
+          <button class="btn" data-role="supervisor1">Supervisor 1</button>
+          <button class="btn" data-role="supervisor2">Supervisor 2</button>
+          <button class="btn primary" data-role="ingeniero">Ingeniero Tiempo Real</button>
+        </div>
+        <p class="tiny" style="margin-top:8px">
+          En producción, el rol proviene de Firebase (tabla <code>/roles/{uid}</code>). En modo demo puedes alternarlos.
+        </p>
+      </div>
+
+      <div class="panel">
+        <h3>Estilo de mapa</h3>
+        <div class="row">
+          <span class="pill">Toggle 3D</span>
+          <button id="btn3d" class="btn">Activar 3D</button>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <span class="chip active" data-style="mapbox://styles/mapbox/streets-v12">Streets</span>
+          <span class="chip" data-style="mapbox://styles/mapbox/outdoors-v12">Outdoors</span>
+          <span class="chip" data-style="mapbox://styles/mapbox/dark-v11">Dark</span>
+          <span class="chip" data-style="mapbox://styles/mapbox/light-v11">Light</span>
+          <span class="chip" data-style="mapbox://styles/mapbox/satellite-streets-v12">Satellite</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Puntos (sample)</h3>
+        <div id="pointsList" class="tiny">Cargando…</div>
+      </div>
+
+      <div class="panel">
+        <h3>Ayuda</h3>
+        <ul class="tiny" style="margin:0 0 8px 16px; line-height:1.6">
+          <li>Haz click en un marcador para ver acciones según tu rol.</li>
+          <li>Ingeniero: click en el mapa para agregar punto con incidencia.</li>
+          <li>Biblioteca & USP se abren en el panel derecho.</li>
+        </ul>
+      </div>
+    </aside>
+
+    <div id="map">
+      <div id="roleBanner" class="role-banner" style="display:none;">Bienvenido</div>
+
+      <div class="map-toolbar">
+        <button class="btn" id="btnLocate">Centrar en mi ubicación</button>
+        <button class="btn" id="btnSeed">Cargar datos demo</button>
+        <button class="btn" id="btnClear">Limpiar demo</button>
+      </div>
+      <div class="style-switcher" id="styleSwitcher"></div>
+      <div class="drawer" id="drawer">
+        <header class="row" style="padding:12px 14px">
+          <strong id="drawerTitle">Documentos</strong>
+          <div style="flex:1"></div>
+          <button class="btn" id="drawerClose">Cerrar</button>
+        </header>
+        <div class="content" id="drawerContent">
+          <!-- contenido dinámico -->
+        </div>
+      </div>
+      <div class="footer-note">Mapbox • Terrain 3D • Realtime Firebase</div>
+    </div>
+  </div>
+
+  <!-- Modal Login -->
+  <div class="modal" id="loginModal">
+    <div class="box">
+      <h3 style="margin:0 0 10px">Iniciar sesión</h3>
+      <p class="tiny" style="margin-top:0">En demo puedes usar las credenciales de abajo. Para prod, usa Firebase Auth.</p>
+      <div class="split">
+        <div>
+          <label>Email</label>
+          <input id="email" type="email" placeholder="usuario@demo.com">
+        </div>
+        <div>
+          <label>Contraseña</label>
+          <input id="password" type="password" placeholder="••••••••">
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" id="doLogin">Entrar</button>
+        <button class="btn" id="doCloseLogin">Cancelar</button>
+      </div>
+      <p class="tiny" style="margin-top:8px">
+        <strong>Demo:</strong> sup1@demo.com / 12345 · sup2@demo.com / 12345 · ingtr@demo.com / 12345
+      </p>
+      <p id="authMsg" class="tiny" style="margin-top:8px"></p>
+    </div>
+  </div>
+
+  <!-- Modal Crear/Editar Punto (Ingeniero) -->
+  <div class="modal" id="pointModal">
+    <div class="box">
+      <h3 id="pointModalTitle" style="margin:0 0 10px">Nuevo punto</h3>
+      <div class="split">
+        <div>
+          <label>Nombre del punto</label>
+          <input type="text" id="pName" placeholder="Poste 132 / Banco NIC T2">
+        </div>
+        <div>
+          <label>Tipo / Aparato</label>
+          <input type="text" id="pType" placeholder="Luminaria / Banco / Tablero">
+        </div>
+      </div>
+      <div class="split" style="margin-top:8px">
+        <div>
+          <label>Latitud</label>
+          <input type="text" id="pLat" readonly>
+        </div>
+        <div>
+          <label>Longitud</label>
+          <input type="text" id="pLng" readonly>
+        </div>
+      </div>
+      <div style="margin-top:8px">
+        <label>Incidencia detectada</label>
+        <textarea id="pIssue" rows="3" placeholder="Falla detectada (apagada, brazo dañado, etc.)"></textarea>
+      </div>
+      <div class="split" style="margin-top:8px">
+        <div>
+          <label>Documento (URL opcional)</label>
+          <input type="text" id="pDoc" placeholder="https://...">
+        </div>
+        <div>
+          <label>Manual USP (URL opcional)</label>
+          <input type="text" id="pManual" placeholder="https://...">
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn primary" id="savePoint">Guardar</button>
+        <button class="btn" id="cancelPoint">Cancelar</button>
+        <button class="btn" id="deletePoint" style="display:none;background:linear-gradient(90deg,#ff6b6b,#ff4d6d);border:none;">Eliminar</button>
+      </div>
+      <p id="pointMsg" class="tiny" style="margin-top:10px"></p>
+    </div>
+  </div>
+
+  <!-- ========= NUEVO: Modal Reporte de Campo (Ingeniero) ========= -->
+  <div class="modal" id="fieldModal">
+    <div class="box">
+      <h3 id="fieldModalTitle" style="margin:0 0 10px">Reporte de campo</h3>
+      <div>
+        <label>Descripción</label>
+        <textarea id="rDesc" rows="3" placeholder="Describe la incidencia..."></textarea>
+      </div>
+      <div class="split" style="margin-top:8px">
+        <div>
+          <label>Prioridad</label>
+          <select id="rPrio">
+            <option value="Alta">Alta</option>
+            <option value="Media" selected>Media</option>
+            <option value="Baja">Baja</option>
+          </select>
+        </div>
+        <div>
+          <label>Observaciones</label>
+          <input id="rObs" type="text" placeholder="Observaciones opcionales">
+        </div>
+      </div>
+      <div class="split" style="margin-top:8px">
+        <div>
+          <label>Lat</label>
+          <input id="rLat" type="text" readonly>
+        </div>
+        <div>
+          <label>Lng</label>
+          <input id="rLng" type="text" readonly>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn primary" id="saveReport">Guardar reporte</button>
+        <button class="btn" id="cancelReport">Cancelar</button>
+      </div>
+      <p id="fieldMsg" class="tiny" style="margin-top:10px"></p>
+    </div>
+  </div>
+
+  <script type="module">
+    /***********************
+     * 1) CONFIGURACIONES  *
+     ***********************/
+    // 🔷 Pega tu token de Mapbox:
+    mapboxgl.accessToken = 'pk.eyJ1IjoibWFycXVpbmhvIiwiYSI6ImNsbncydDkzNjA0MDEycWp5Y2hsZzNiZHoifQ.dUzSeWKWWe7R36yohDNb0g';
+
+    // 🔷 Config Firebase (Realtime Database + Auth):
+    const firebaseConfig = {
+        apiKey: "AIzaSyCGuGpJEWo1_9gWwgSv3JO9s1051wDpY6E",
+        authDomain: "alumbradopubliconte.firebaseapp.com",
+        databaseURL: "https://alumbradopubliconte-default-rtdb.firebaseio.com",
+        projectId: "alumbradopubliconte",
+        storageBucket: "alumbradopubliconte.appspot.com",
+        messagingSenderId: "842157703635",
+        appId: "1:842157703635:web:64db480e6191f6c0326f26",
+        measurementId: "G-H4PG2MM8S5"
+    };
+
+    /***********************************
+     * 2) IMPORTS FIREBASE (modular v10)
+     ***********************************/
+    import {
+      initializeApp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getDatabase, ref, set, get, push, update, remove, onValue
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const appFB  = initializeApp(firebaseConfig);
+    const auth   = getAuth(appFB);
+    const db     = getDatabase(appFB);
+
+    /***********************
+     * 3) ESTADO DE LA APP *
+     ***********************/
+    const state = {
+      demo:true,                // Demo mode ON por defecto (sin Auth real)
+      role:'supervisor1',       // supervisor1 | supervisor2 | ingeniero
+      user:null,
+      is3d:false,
+      map:null,
+      markers:{},               // id -> Marker
+      lastClickLngLat:null,     // para crear puntos
+      editingId:null,           // si editamos un punto existente
+      lastClickedPoint:null     // para reporte de campo
+    };
+
+    // UI refs
+    const roleChip = document.getElementById('roleName');
+    const roleBanner = document.getElementById('roleBanner');
+    const demoSwitch = document.getElementById('demoSwitch');
+    const demoState = document.getElementById('demoState');
+    const btnLogin = document.getElementById('btnLogin');
+    const btnLogout = document.getElementById('btnLogout');
+    const pointsList = document.getElementById('pointsList');
+
+    const loginModal = document.getElementById('loginModal');
+    const doLogin = document.getElementById('doLogin');
+    const doCloseLogin = document.getElementById('doCloseLogin');
+    const authMsg = document.getElementById('authMsg');
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+
+    const drawer = document.getElementById('drawer');
+    const drawerTitle = document.getElementById('drawerTitle');
+    const drawerContent = document.getElementById('drawerContent');
+    document.getElementById('drawerClose').onclick = () => drawer.classList.remove('open');
+
+    const pointModal = document.getElementById('pointModal');
+    const pointModalTitle = document.getElementById('pointModalTitle');
+    const pName = document.getElementById('pName');
+    const pType = document.getElementById('pType');
+    const pLat = document.getElementById('pLat');
+    const pLng = document.getElementById('pLng');
+    const pIssue = document.getElementById('pIssue');
+    const pDoc = document.getElementById('pDoc');
+    const pManual = document.getElementById('pManual');
+    const savePoint = document.getElementById('savePoint');
+    const deletePoint = document.getElementById('deletePoint');
+    const cancelPoint = document.getElementById('cancelPoint');
+    const pointMsg = document.getElementById('pointMsg');
+
+    // NUEVO: modal de reporte
+    const fieldModal = document.getElementById('fieldModal');
+    const rDesc = document.getElementById('rDesc');
+    const rPrio = document.getElementById('rPrio');
+    const rObs  = document.getElementById('rObs');
+    const rLat  = document.getElementById('rLat');
+    const rLng  = document.getElementById('rLng');
+    const saveReport = document.getElementById('saveReport');
+    const cancelReport = document.getElementById('cancelReport');
+    const fieldMsg = document.getElementById('fieldMsg');
+
+    /**********************
+     * 4) INICIALIZACIÓN  *
+     **********************/
+    // Map init
+    const map = new mapboxgl.Map({
+      container:'map',
+      style:'mapbox://styles/mapbox/streets-v12',
+      center:[-100.3161, 25.6866], // Monterrey (ejemplo)
+      zoom:12,
+      pitch:0,
+      bearing:0,
+      antialias:true
+    });
+    state.map = map;
+
+    map.addControl(new mapboxgl.NavigationControl({visualizePitch:true}), 'bottom-right');
+    map.addControl(new mapboxgl.ScaleControl({maxWidth:140, unit:'metric'}));
+
+    // Terrain 3D
+    map.on('load', () => {
+      map.addSource('mapbox-dem', { type:'raster-dem', url:'mapbox://mapbox.terrain-rgb', tileSize:512, maxzoom:14 });
+      // re-dibuja marcadores y suscríbete a DB
+      refreshMarkers();
+      subscribePoints();
+    });
+
+    // Re-aplicar DEM tras cambio de estilo + redibujar marcadores
+    map.on('styledata', () => {
+      if (!map.getSource('mapbox-dem')){
+        map.addSource('mapbox-dem', { type:'raster-dem', url:'mapbox://mapbox.terrain-rgb', tileSize:512, maxzoom:14 });
+      }
+      if (state.is3d) enable3D(true);
+      refreshMarkers();
+    });
+
+    // Estilos (chips)
+    document.querySelectorAll('.chip').forEach(ch => {
+      ch.addEventListener('click', () => {
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        ch.classList.add('active');
+        map.setStyle(ch.dataset.style);
+      });
+    });
+
+    // Toggle 3D
+    document.getElementById('btn3d').addEventListener('click', () => {
+      state.is3d = !state.is3d;
+      enable3D(state.is3d);
+      document.getElementById('btn3d').textContent = state.is3d ? 'Desactivar 3D' : 'Activar 3D';
+    });
+
+    function enable3D(on){
+      if (on){
+        if (map.getSource('mapbox-dem')){
+          map.setTerrain({source:'mapbox-dem', exaggeration:1.4});
+          map.easeTo({pitch:60, bearing:30, duration:900});
+        }
+      } else {
+        map.setTerrain(null);
+        map.easeTo({pitch:0, bearing:0, duration:900});
+      }
+    }
+
+    // Localización
+    document.getElementById('btnLocate').addEventListener('click', ()=>{
+      if (!navigator.geolocation) return;
+      navigator.geolocation.getCurrentPosition(pos=>{
+        const {longitude, latitude} = pos.coords;
+        map.flyTo({center:[longitude, latitude], zoom:14, speed:0.9});
+      });
+    });
+
+    // Modo demo y login
+    demoSwitch.addEventListener('click', ()=>{
+      state.demo = !state.demo;
+      demoState.textContent = state.demo ? 'ON' : 'OFF';
+      updateAuthUI();
+    });
+    btnLogin.addEventListener('click', ()=> showModal(loginModal,true));
+    btnLogout.addEventListener('click', async ()=>{
+      await signOut(auth).catch(()=>{});
+    });
+
+    // Botones de rol (demo)
+    document.querySelectorAll('aside [data-role]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        state.role = btn.getAttribute('data-role');
+        updateRoleUI();   // <-- NUEVO: existía llamada, ahora definida
+      });
+    });
+
+    // Login (Firebase real) + DEMO LOGIN
+    doLogin.addEventListener('click', async ()=>{
+      const e=email.value.trim(), p=password.value.trim();
+      if (!e || !p){ authMsg.textContent='Ingresa email y contraseña'; authMsg.className='tiny error'; return; }
+
+      // DEMO LOGIN:
+      const demoUsers = {
+        'sup1@demo.com':'supervisor1',
+        'sup2@demo.com':'supervisor2',
+        'ingtr@demo.com':'ingeniero'
+      };
+      if (demoUsers[e] && p==='12345'){
+        state.user = { email:e, uid:'demo-'+demoUsers[e] };
+        state.role = demoUsers[e];
+        state.demo = false;
+        authMsg.textContent = 'Sesión DEMO iniciada como '+prettyRole(state.role);
+        authMsg.className='tiny ok';
+        setTimeout(()=> showModal(loginModal,false), 400);
+        updateAuthUI();
+        updateRoleUI();
+        return;
+      }
+
+      // Firebase Auth real (opcional)
+      try{
+        const cred = await signInWithEmailAndPassword(auth, e, p);
+        state.user = cred.user;
+        // leer rol de /roles/{uid}
+        const rSnap = await get(ref(db, `roles/${cred.user.uid}`)).catch(()=>null);
+        if (rSnap && rSnap.exists()){ state.role = rSnap.val(); }
+        authMsg.textContent = 'Autenticado correctamente.'; authMsg.className='tiny ok';
+        showModal(loginModal,false);
+        updateAuthUI();
+        updateRoleUI();
+      }catch(err){
+        authMsg.textContent = 'No se pudo iniciar sesión: '+err.message;
+        authMsg.className='tiny error';
+      }
+    });
+    doCloseLogin.addEventListener('click', ()=> showModal(loginModal,false));
+
+    onAuthStateChanged(auth, async (u)=>{
+      state.user = u||null;
+      if (u){
+        const rSnap = await get(ref(db, `roles/${u.uid}`)).catch(()=>null);
+        if (rSnap && rSnap.exists()){ state.role = rSnap.val(); }
+        state.demo = false;
+      }
+      updateAuthUI();
+      updateRoleUI();
+    });
+
+    function updateAuthUI(){
+      btnLogin.style.display = state.user || state.demo===false ? 'none':'inline-flex';
+      btnLogout.style.display = state.user ? 'inline-flex':'none';
+      document.getElementById('demoState').textContent = state.demo ? 'ON':'OFF';
+      roleChip.textContent = prettyRole(state.role);
+      roleChip.className = 'role-tag ' + roleClass(state.role);
+    }
+    function prettyRole(r){
+      if (r==='supervisor1') return 'Supervisor 1';
+      if (r==='supervisor2') return 'Supervisor 2';
+      if (r==='ingeniero')   return 'Ingeniero TR';
+      return 'Demo';
+    }
+    function roleClass(r){
+      if (r==='supervisor1') return 'role-sup1';
+      if (r==='supervisor2') return 'role-sup2';
+      if (r==='ingeniero')   return 'role-eng';
+      return '';
+    }
+    // ========= NUEVO: actualizar banner/etiqueta de rol (faltaba esta función) =========
+    function updateRoleUI(){
+      roleChip.textContent = prettyRole(state.role);
+      roleChip.className = 'role-tag ' + roleClass(state.role);
+      // banner visible
+      roleBanner.style.display = 'inline-flex';
+      roleBanner.textContent = 'Bienvenido ' + prettyRole(state.role);
+    }
+
+    function showModal(el, show=true){
+      el.classList.toggle('show', show);
+    }
+
+    /****************************************
+     * 5) DATOS: SUSCRIPCIÓN Y CRUD PUNTOS  *
+     ****************************************/
+    function subscribePoints(){
+      onValue(ref(db, 'points'), snap=>{
+        const all = snap.val()||{};
+        renderPointsList(all);
+        drawMarkers(all);
+      });
+    }
+
+    function renderPointsList(all){
+      const ids = Object.keys(all);
+      if (ids.length===0){ pointsList.innerHTML='Sin puntos aún. Usa "Cargar datos demo" o agrega con el rol Ingeniero.'; return; }
+      pointsList.innerHTML = ids.map(id=>{
+        const p=all[id];
+        return `<div class="doc-item">
+          <div style="font-weight:700">${p.name||'Sin nombre'}</div>
+          <div class="tiny" style="opacity:.8">${(+p.lat).toFixed(5)}, ${(+p.lng).toFixed(5)} · ${p.type||'—'}</div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn" data-zoom="${id}">Ir</button>
+            ${state.role==='ingeniero' ? `<button class="btn" data-edit="${id}">Editar</button>`:''}
+          </div>
+        </div>`;
+      }).join('');
+      pointsList.querySelectorAll('[data-zoom]').forEach(b=>{
+        b.onclick = ()=>{
+          const id=b.getAttribute('data-zoom');
+          const p = all[id];
+          state.map.flyTo({center:[p.lng,p.lat], zoom:16});
+        };
+      });
+      pointsList.querySelectorAll('[data-edit]').forEach(b=>{
+        b.onclick = ()=>{
+          const id=b.getAttribute('data-edit');
+          const p=all[id];
+          openPointEditor(p, id);
+        };
+      });
+    }
+
+    function drawMarkers(all){
+      // borrar previos
+      for (const id in state.markers){ state.markers[id].remove(); }
+      state.markers = {};
+      // crear nuevos
+      Object.entries(all).forEach(([id, p])=>{
+        const el = document.createElement('div');
+        // tu estilo original...
+        el.style.width='18px'; el.style.height='18px'; el.style.borderRadius='50%';
+        el.style.border='2px solid #fff';
+        el.style.boxShadow='0 0 0 3px rgba(32,201,255,.25)';
+        el.style.background = p.type && /banco|tablero|transformador/i.test(p.type)
+          ? 'linear-gradient(180deg,#20c9ff,#6af0ff)'
+          : 'linear-gradient(180deg,#8b9eff,#b9c6ff)';
+        // ...y además la imagen:
+        el.classList.add('marker-book');
+        // 🔧 Forzar el pin de imagen (sin borrar nada de tu código anterior)
+el.style.background = ''; // limpia el shorthand 'background' para no tapar la imagen
+el.style.backgroundImage = 'url("book1.png")';
+el.style.backgroundSize = 'cover';
+el.style.backgroundPosition = 'center';
+
+// tamaño grande
+el.style.width = '54px';
+el.style.height = '54px';
+
+
+
+        const m = new mapboxgl.Marker({element:el, anchor:'bottom'})
+          .setLngLat([p.lng, p.lat])
+          .addTo(map);
+        m.getElement().style.cursor='pointer';
+
+        // ========= NUEVO: acción por rol al hacer clic en el pin =========
+        m.getElement().addEventListener('click', ()=>{
+          state.lastClickedPoint = { id, ...p };
+          openPinByRole(p, id);
+        });
+
+        state.markers[id]=m;
+      });
+    }
+
+    // ========= NUEVO: función faltante que se invocaba al cargar/cambiar estilo =========
+    async function refreshMarkers(){
+      const snap = await get(ref(db,'points')).catch(()=>null);
+      const all = snap && snap.exists() ? snap.val() : {};
+      drawMarkers(all);
+    }
+
+    function openPopupForPoint(p, id){
+      // (conservamos tu popup original, pero la acción principal ahora va por rol)
+      const role = state.role;
+      const wrapper = document.createElement('div');
+      wrapper.className='popup-content';
+      wrapper.innerHTML = `
+        <div class="popup-title">${p.name||'Punto'}</div>
+        <div class="popup-sub">${p.type||'—'} · ${(+p.lat).toFixed(5)}, ${(+p.lng).toFixed(5)}</div>
+        <div class="popup-actions">
+          ${role==='supervisor1' || role==='ingeniero' ? `<a href="#" class="link" data-docs>📚 Biblioteca de documentos</a>`:''}
+          ${role==='supervisor2' || role==='ingeniero' ? `<a href="#" class="link" data-usp>📘 Manual USP de Operaciones</a>`:''}
+          ${role==='ingeniero' ? `<a href="#" class="link" data-inc>🛠️ Registrar nueva incidencia</a>`:''}
+          ${role==='ingeniero' ? `<a href="#" class="link" data-edit>✏️ Editar punto</a>`:''}
+        </div>
+      `;
+      const popup = new mapboxgl.Popup({offset:16, closeButton:true, className:'neo-pop'})
+        .setLngLat([p.lng,p.lat])
+        .setDOMContent(wrapper)
+        .addTo(map);
+
+      const openDocs = () => openDocsDrawer(p);
+      const openUSP  = () => openUSPDrawer(p);
+      const openInc  = () => openIncidenceModal(p, id);
+      const openEdit = () => openPointEditor(p, id);
+
+      wrapper.querySelector('[data-docs]')?.addEventListener('click', (e)=>{e.preventDefault(); openDocs();});
+      wrapper.querySelector('[data-usp]') ?.addEventListener('click', (e)=>{e.preventDefault(); openUSP();});
+      wrapper.querySelector('[data-inc]') ?.addEventListener('click', (e)=>{e.preventDefault(); openInc();});
+      wrapper.querySelector('[data-edit]')?.addEventListener('click', (e)=>{e.preventDefault(); openEdit();});
+    }
+
+    // ========= NUEVO: Acciones de clic por rol =========
+    function openPinByRole(p, id){
+      if (state.role==='supervisor1'){ openDocsDrawer(p); return; }
+      if (state.role==='supervisor2'){ openUSPDrawer(p); return; }
+      if (state.role==='ingeniero'){   openIncidenceModal(p, id); return; } // abre el formulario de 3 campos
+      // fallback
+      openDocsDrawer(p);
+    }
+
+    // ========= NUEVO: Drawers de documentos/USP con tabs + link externo =========
+    function renderTabsViewer(files, linkURL){
+      drawerContent.innerHTML = '';
+      const tabBar = document.createElement('div'); tabBar.className='tabs';
+      const container = document.createElement('div');
+      drawerContent.append(tabBar, container);
+
+      files.forEach((f,i)=>{
+        const btn = document.createElement('div');
+        btn.className = 'tab-btn'+(i===0?' active':'');
+        btn.textContent = f.title;
+        btn.onclick = ()=> switchTab(i);
+        tabBar.appendChild(btn);
+
+        const pane = document.createElement('div');
+        pane.className = 'tab-pane'+(i===0?' active':'');
+        pane.innerHTML = `
+          <iframe class="pdf-frame" src="${f.file}"></iframe>
+          <a class="link" href="${f.file}" target="_blank">Abrir ${f.title} en nueva pestaña</a>
+        `;
+        container.appendChild(pane);
+      });
+
+      const ext = document.createElement('a');
+      ext.href = linkURL; ext.target = '_blank'; ext.className='ext-btn';
+      ext.textContent = '🌐 Abrir ConsultoriaT3ch';
+      drawerContent.appendChild(ext);
+
+      function switchTab(idx){
+        tabBar.querySelectorAll('.tab-btn').forEach((b,i)=> b.classList.toggle('active', i===idx));
+        container.querySelectorAll('.tab-pane').forEach((p,i)=> p.classList.toggle('active', i===idx));
+      }
+      drawer.classList.add('open');
+    }
+
+    function openDocsDrawer(p){
+      drawerTitle.textContent = `Biblioteca — ${p.name||'Punto'}`;
+      renderTabsViewer([
+        {title:'PDF 1', file:'pdf1.pdf'},
+        {title:'Link v1', file:'https://testerv17.github.io/ConsultoriaT3ch/'},
+        {title:'Link v2', file:'https://berobrewing.com/products/from-am-pm-set'}
+      ], 'https://testerv17.github.io/ConsultoriaT3ch/');
+    }
+    function openUSPDrawer(p){
+      drawerTitle.textContent = `Manual USP — ${p.name||'Punto'}`;
+      renderTabsViewer([
+        {title:'USP 1', file:'pdf2.pdf'},
+        {title:'USP 2', file:'pdf3.pdf'},
+        {title:'USP 3', file:'pdf1.pdf'}
+      ], 'https://testerv17.github.io/ConsultoriaT3ch/');
+    }
+
+    // ========= NUEVO: Modal de reporte de campo (3 campos) =========
+    function openIncidenceModal(p, id){
+      rDesc.value = '';
+      rPrio.value = 'Media';
+      rObs.value  = '';
+      rLat.value  = p.lat;
+      rLng.value  = p.lng;
+      fieldMsg.textContent = '';
+
+      showModal(fieldModal,true);
+    }
+
+    saveReport.addEventListener('click', async ()=>{
+      // valida
+      const desc = rDesc.value.trim();
+      const prio = rPrio.value;
+      const obs  = rObs.value.trim();
+      const lat  = parseFloat(rLat.value);
+      const lng  = parseFloat(rLng.value);
+      if (!desc || !Number.isFinite(lat) || !Number.isFinite(lng)){
+        fieldMsg.textContent = 'Completa la descripción y asegúrate de que lat/lng son válidos.';
+        fieldMsg.className = 'tiny error';
+        return;
+      }
+      try{
+        const payload = {
+          descripcion: desc,
+          prioridad: prio,
+          observaciones: obs || '',
+          lat, lng,
+          fecha: Date.now(),
+          rol: prettyRole(state.role),
+          email: state.user?.email || 'ingtr@demo.com'
+        };
+        const newId = push(ref(db,'reportescampo')).key;
+        await set(ref(db,'reportescampo/'+newId), payload);
+        fieldMsg.textContent = 'Reporte guardado correctamente.';
+        fieldMsg.className = 'tiny ok';
+        setTimeout(()=> showModal(fieldModal,false), 500);
+      }catch(err){
+        fieldMsg.textContent = 'Error guardando: '+err.message;
+        fieldMsg.className = 'tiny error';
+      }
+    });
+    cancelReport.addEventListener('click', ()=> showModal(fieldModal,false));
+
+    function openPointEditor(p, id){
+      state.editingId = id || null;
+      pointModalTitle.textContent = id ? `Editar punto — ${p?.name||''}` : 'Nuevo punto';
+      pName.value = p?.name||''; pType.value=p?.type||'';
+      pLat.value = p?.lat || (state.lastClickLngLat?.lat ?? ''); 
+      pLng.value = p?.lng || (state.lastClickLngLat?.lng ?? '');
+      pIssue.value=''; pDoc.value=''; pManual.value='';
+      deletePoint.style.display = id ? 'inline-flex':'none';
+      pointMsg.textContent='';
+      showModal(pointModal,true);
+    }
+
+    // Click en el mapa: solo ingeniero puede crear
+    map.on('click', (e)=>{
+      if (state.role!=='ingeniero') return;
+      state.lastClickLngLat = e.lngLat;
+      openPointEditor(null,null);
+    });
+
+    // Guardar / Eliminar / Cancelar punto
+    savePoint.addEventListener('click', async ()=>{
+      if (state.role!=='ingeniero'){ pointMsg.textContent='No tienes permisos.'; pointMsg.className='tiny error'; return; }
+      const name = pName.value.trim();
+      const type = pType.value.trim();
+      const lat  = parseFloat(pLat.value);
+      const lng  = parseFloat(pLng.value);
+      const issue = pIssue.value.trim();
+      const docUrl = pDoc.value.trim();
+      const manUrl = pManual.value.trim();
+
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)){ pointMsg.textContent='Lat/Lng inválidos'; pointMsg.className='tiny error'; return; }
+      if (!name){ pointMsg.textContent='Agrega un nombre.'; pointMsg.className='tiny error'; return; }
+
+      try{
+        let id = state.editingId;
+        if (!id){
+          id = push(ref(db,'points')).key;
+        }
+        const pRef = ref(db, 'points/'+id);
+        const currSnap = await get(pRef);
+        const curr = currSnap.exists() ? currSnap.val() : {};
+        const docs = curr.docs || [];
+        const manuals = curr.manuals || [];
+        const incidences = curr.incidences || [];
+
+        if (docUrl) docs.push({title:'Documento', url:docUrl});
+        if (manUrl) manuals.push({title:'Manual USP', url:manUrl});
+        if (issue) incidences.push({text:issue, ts:Date.now(), by: state.user?.email || 'ingeniero@demo'});
+
+        await set(pRef, { id, name, type, lat, lng, docs, manuals, incidences });
+
+        pointMsg.textContent='Guardado correctamente.';
+        pointMsg.className='tiny ok';
+        setTimeout(()=> showModal(pointModal,false), 600);
+      }catch(err){
+        pointMsg.textContent='Error guardando: '+err.message;
+        pointMsg.className='tiny error';
+      }
+    });
+
+    deletePoint.addEventListener('click', async ()=>{
+      if (state.role!=='ingeniero'){ pointMsg.textContent='No tienes permisos.'; pointMsg.className='tiny error'; return; }
+      if (!state.editingId){ showModal(pointModal,false); return; }
+      await remove(ref(db,'points/'+state.editingId)).catch(()=>{});
+      pointMsg.textContent='Eliminado.';
+      pointMsg.className='tiny ok';
+      setTimeout(()=> showModal(pointModal,false), 400);
+    });
+
+    cancelPoint.addEventListener('click', ()=> showModal(pointModal,false));
+
+    /****************************************
+     * 6) POPULATE DEMO (SEED / CLEAR DEMO) *
+     ****************************************/
+    document.getElementById('btnSeed').addEventListener('click', async ()=>{
+      const samples = [
+        {
+          name:'Punto 1 — Biblioteca de Aparatos',
+          type:'Banco / Aparato',
+          lat:25.674527343953063,
+          lng:-100.34626127938994,
+          docs:[{title:'Manual técnico Banco', url:'https://example.com/manual-banco.pdf'}],
+          manuals:[{title:'Procedimiento General', url:'https://example.com/procedimiento.pdf'}],
+          incidences:[{text:'Revisión de estructura completa', ts:Date.now()-7200000, by:'ing@demo'}]
+        },
+        {
+          name:'Punto 2 — Manual USP de Operaciones',
+          type:'Tablero / USP',
+          lat:25.673402361762037,
+          lng:-100.42408246247359,
+          docs:[{title:'Esquema eléctrico', url:'https://example.com/esquema.pdf'}],
+          manuals:[{title:'USP Operación Segura', url:'https://example.com/usp-operacion.pdf'}],
+          incidences:[{text:'Cableado suelto detectado', ts:Date.now()-5400000, by:'ing@demo'}]
+        },
+        {
+          name:'Punto 3 — Ingeniería Tiempo Real',
+          type:'Luminaria / Campo',
+          lat:25.659117543502038,
+          lng:-100.40115211587113,
+          docs:[{title:'Ficha técnica luminaria', url:'https://example.com/luminaria.pdf'}],
+          manuals:[{title:'USP Sustitución LED', url:'https://example.com/usp-led.pdf'}],
+          incidences:[{text:'Foco apagado reportado', ts:Date.now()-3600000, by:'ing@demo'}]
+        }
+      ];
+      for (const s of samples){
+        const id = push(ref(db,'points')).key;
+        await set(ref(db,'points/'+id), {id, ...s});
+      }
+      alert('✅ Puntos demo cargados');
+    });
+
+    document.getElementById('btnClear').addEventListener('click', async ()=>{
+      await set(ref(db,'points'), null);
+      alert('🧹 Datos demo eliminados');
+    });
+
+  </script>
+</body>
+</html>

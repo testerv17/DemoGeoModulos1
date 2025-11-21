@@ -19,31 +19,29 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --bg:#0b1020;        /* fondo principal */
-      --bg-soft:#0f152a;   /* paneles */
-      --card:#131b36;
-      --text:#e8f0ff;
-      --muted:#a9b4d0;
-      --brand:#20c9ff;     /* acento cian */
-      --brand-2:#6af0ff;   /* acento cian claro */
-      --danger:#ff4d6d;    /* error */
-      --success:#33e2a0;   /* ok */
-      --shadow:0 10px 30px rgba(0,0,0,.35);
-      --radius:18px;
-    }
+   :root{
+  /* Paleta inspirada en tu captura: fondo blanco, marca roja */
+  --bg:#ffffff;           /* fondo principal (blanco) */
+  --bg-soft:#f3f4f6;      /* paneles / modales suaves */
+  --card:#ffffff;
+  --text:#111827;         /* texto oscuro */
+  --muted:#6b7280;        /* gris descripción */
+  --brand:#e31b23;        /* rojo Datobox */
+  --brand-2:#c91019;      /* rojo oscuro */
+  --danger:#ef4444;       /* error */
+  --success:#10b981;      /* ok */
+  --shadow:0 10px 30px rgba(0,0,0,.06);
+  --radius:14px;
+}
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;
-      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;
-      background:
-        radial-gradient(1200px 1200px at 85% 10%, rgba(32,201,255,.12), transparent 40%),
-        radial-gradient(900px 900px at 10% 85%, rgba(106,240,255,.10), transparent 40%),
-        var(--bg);
-      color:var(--text);
-      overflow:hidden;
-    }
+  margin:0;
+  font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;
+  background: var(--bg);
+  color:var(--text);
+  overflow:hidden;
+}
     .app{
       display:grid;
       grid-template-columns: 320px 1fr;
@@ -54,24 +52,22 @@
       height:100%;
     }
     header{
-      grid-area:header;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:14px 18px;
-      background:linear-gradient(180deg, rgba(255,255,255,.04), transparent);
-      border-bottom:1px solid rgba(255,255,255,.06);
-      backdrop-filter: blur(6px);
-    }
+  grid-area:header;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;
+  background:#fff;
+  border-bottom:1px solid #e5e7eb;
+  backdrop-filter:none;
+}
     .brand{
       display:flex;align-items:center;gap:12px;
       font-weight:800;letter-spacing:.4px;
     }
     .brand .logo{
-      width:38px;height:38px;border-radius:12px;
-      background: radial-gradient(circle at 30% 20%, var(--brand-2), var(--brand) 60%, #0af 100%);
-      box-shadow: inset 0 0 10px rgba(255,255,255,.2), var(--shadow);
-    }
+  width:40px;height:40px;border-radius:6px;
+  background: url("logo-datobox-gam.png") center/contain no-repeat;
+  box-shadow:none;
+}
     .actions{display:flex;gap:10px;align-items:center}
 
     .badge{
@@ -80,29 +76,29 @@
       font-weight:700;box-shadow: var(--shadow);
     }
     .btn{
-      border:1px solid rgba(255,255,255,.10);
-      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.01));
-      color:var(--text); padding:10px 12px;border-radius:12px;
-      font-weight:600; cursor:pointer; transition:.2s; backdrop-filter:blur(4px);
-    }
-    .btn:hover{transform: translateY(-1px); border-color: rgba(32,201,255,.7)}
-    .btn.primary{
-      background: linear-gradient(90deg, var(--brand), var(--brand-2));
-      color:#00222a; border:none;
-    }
+  border:1px solid #e5e7eb;
+  background:#fff;
+  color:var(--text);
+  padding:10px 12px;border-radius:10px;font-weight:600;cursor:pointer;transition:.2s;
+}
+.btn:hover{transform: translateY(-1px); border-color:#d1d5db}
+.btn.primary{
+  background: #5c85ff;   /* azul del botón "Entrar" de tu captura */
+  color:#fff; border:none;
+}
 
-    aside{
-      grid-area:sidebar; padding:16px; overflow:auto;
-      background: linear-gradient(180deg, rgba(255,255,255,.04), transparent);
-      border-right:1px solid rgba(255,255,255,.06);
-    }
-    .panel{
-      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:var(--radius); padding:14px; margin-bottom:14px;
-      box-shadow: var(--shadow);
-    }
-    .panel h3{margin:0 0 12px; font-size:15px; color:#dbe6ff}
+aside{
+  background:#fafafa;
+  border-right:1px solid #e5e7eb;
+}
+.panel{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:var(--radius); padding:14px; margin-bottom:14px;
+  box-shadow: var(--shadow);
+}
+.panel h3{color:#111827}
+    
     .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
     select, input[type="text"], input[type="email"], input[type="password"], textarea{
       width:100%; padding:10px 12px; border-radius:12px; outline:none;
@@ -229,7 +225,8 @@
       <div class="brand">
         <div class="logo"></div>
         <div>
-          <div style="font-size:15px;opacity:.9">Demo Geomódulos</div>
+          
+          <div style="font-size:15px;opacity:.9">Demo Geomódulos</div><img src="dboxgma1.png" alt="Datobox GAM" style="height: 120px;width: 120;">
           <div class="tiny">Supervisión • Biblioteca • USP • Ingeniería en Tiempo Real</div>
         </div>
       </div>
@@ -292,6 +289,8 @@
         <button class="btn" id="btnLocate">Centrar en mi ubicación</button>
         <button class="btn" id="btnSeed">Cargar datos demo</button>
         <button class="btn" id="btnClear">Limpiar demo</button>
+        <button class="btn" id="btnLoadGAM">Cargar activos GAM</button>
+        <button class="btn" id="btnExportGAM">Exportar CSV GAM</button>
       </div>
       <div class="style-switcher" id="styleSwitcher"></div>
       <div class="drawer" id="drawer">
@@ -422,6 +421,138 @@
   </div>
 
   <script type="module">
+
+    /***********************
+     * 0) DATASET GAM ESTÁTICO
+     ***********************/
+    const gamActivos = [
+      {
+        codigo: "DRA-00034",
+        nombre: "ACTIVO",
+        nombreInmueble: "Residencial Alameda",
+        tipo: "DEPARTAMENTO",
+        status: "EN RENTA",
+        superficieM2: "437",
+        lat: 25.66342,
+        lon: -100.40604,
+        direccion: "Av. Reforma #278",
+        uso: "INDUSTRIAL",
+        nivelRiesgo: "MEDIO",
+        georeferencia: "https://datobox.com.mx/gam/?lat=25.66342&lng=-100.40604&zoom=18"
+      },
+      {
+        codigo: "DRA-00035",
+        nombre: "ACTIVO",
+        nombreInmueble: "Torre Empresarial Delta",
+        tipo: "OFICINA",
+        status: "EN REMODELACION",
+        superficieM2: "3,312",
+        lat: 25.66727,
+        lon: -100.46681,
+        direccion: "Calle Morelos #538",
+        uso: "INDUSTRIAL",
+        nivelRiesgo: "BAJO",
+        georeferencia: "https://datobox.com.mx/gam/?lat=25.66727&lng=-100.46681&zoom=18"
+      },
+      {
+        codigo: "DRA-00036",
+        nombre: "ACTIVO",
+        nombreInmueble: "Plaza Norte",
+        tipo: "LOCAL",
+        status: "EN RENTA",
+        superficieM2: "3,210",
+        lat: 20.66997,
+        lon: -103.42864,
+        direccion: "Av. Patria #319",
+        uso: "HABITACIONAL",
+        nivelRiesgo: "BAJO",
+        georeferencia: "https://datobox.com.mx/gam/?lat=20.66997&lng=-103.42864&zoom=18"
+      },
+      {
+        codigo: "DRA-00037",
+        nombre: "ACTIVO",
+        nombreInmueble: "Parque Industrial Aurora",
+        tipo: "DEPARTAMENTO",
+        status: "DISPONIBLE",
+        superficieM2: "4,782",
+        lat: 25.61441,
+        lon: -100.14336,
+        direccion: "Blvd. Las Torres #327",
+        uso: "HABITACIONAL",
+        nivelRiesgo: "ALTO",
+        georeferencia: "https://datobox.com.mx/gam/?lat=25.61441&lng=-100.14336&zoom=18"
+      },
+      {
+        codigo: "DRA-00038",
+        nombre: "ACTIVO",
+        nombreInmueble: "Edificio Reforma 2025",
+        tipo: "TERRENO",
+        status: "DISPONIBLE",
+        superficieM2: "830",
+        lat: 20.67818,
+        lon: -103.42430,
+        direccion: "Av. Patria #510",
+        uso: "COMERCIAL",
+        nivelRiesgo: "BAJO",
+        georeferencia: "https://datobox.com.mx/gam/?lat=20.67818&lng=-103.42430&zoom=18"
+      },
+      {
+        codigo: "DRA-00039",
+        nombre: "ACTIVO",
+        nombreInmueble: "Casa Los Pinos",
+        tipo: "OFICINA",
+        status: "VENDIDA",
+        superficieM2: "1,683",
+        lat: 20.65634,
+        lon: -103.45512,
+        direccion: "Av. del Sol #232",
+        uso: "HABITACIONAL",
+        nivelRiesgo: "ALTO",
+        georeferencia: "https://datobox.com.mx/gam/?lat=20.65634&lng=-103.45512&zoom=18"
+      },
+      {
+        codigo: "DRA-00040",
+        nombre: "ACTIVO",
+        nombreInmueble: "Terreno Valle Verde",
+        tipo: "TERRENO",
+        status: "VENDIDA",
+        superficieM2: "3,550",
+        lat: 25.68085,
+        lon: -100.36470,
+        direccion: "Av. Insurgentes #232",
+        uso: "HABITACIONAL",
+        nivelRiesgo: "MEDIO",
+        georeferencia: "https://datobox.com.mx/gam/?lat=25.68085&lng=-100.36470&zoom=18"
+      },
+      {
+        codigo: "DRA-00041",
+        nombre: "ACTIVO",
+        nombreInmueble: "Centro Corporativo Elite",
+        tipo: "DEPARTAMENTO",
+        status: "EN RENTA",
+        superficieM2: "1,363",
+        lat: 25.66460,
+        lon: -100.41073,
+        direccion: "Paseo Central #312",
+        uso: "COMERCIAL",
+        nivelRiesgo: "MEDIO",
+        georeferencia: "https://datobox.com.mx/gam/?lat=25.66460&lng=-100.41073&zoom=18"
+      },
+      {
+        codigo: "DRA-00042",
+        nombre: "ACTIVO",
+        nombreInmueble: "Local San Pedro",
+        tipo: "DEPARTAMENTO",
+        status: "VENDIDA",
+        superficieM2: "1,958",
+        lat: 20.71424,
+        lon: -103.34204,
+        direccion: "Av. Patria #960",
+        uso: "HABITACIONAL",
+        nivelRiesgo: "ALTO",
+        georeferencia: "https://datobox.com.mx/gam/?lat=20.71424&lng=-103.34204&zoom=18"
+      }
+    ];
     /***********************
      * 1) CONFIGURACIONES  *
      ***********************/
@@ -469,12 +600,19 @@
       markers:{},               // id -> Marker
       lastClickLngLat:null,     // para crear puntos
       editingId:null,           // si editamos un punto existente
-      lastClickedPoint:null     // para reporte de campo
+      lastClickedPoint:null,    // para reporte de campo
+
+      // GAM estático (inmobiliaria)
+      gamLayerId:'gam_inmobiliaria_layer',
+      gamSourceId:'gam_inmobiliaria',
+      gamLoaded:false
     };
 
     // UI refs
     const roleChip = document.getElementById('roleName');
     const roleBanner = document.getElementById('roleBanner');
+    const btnLoadGAM = document.getElementById('btnLoadGAM');
+    const btnExportGAM = document.getElementById('btnExportGAM');
     const demoSwitch = document.getElementById('demoSwitch');
     const demoState = document.getElementById('demoState');
     const btnLogin = document.getElementById('btnLogin');
@@ -862,10 +1000,10 @@ el.style.height = '54px';
     function openDocsDrawer(p){
       drawerTitle.textContent = `Biblioteca — ${p.name||'Punto'}`;
       renderTabsViewer([
-        {title:'Alta', file:'pdf1.pdf'},
-        {title:'Link v1', file:'https://portal.r2docuo.com/datobox/forms/dase'},
-        {title:'Link v2', file:'https://portal.r2docuo.com/datobox/login?redirect=.%2Fdocument%3FD23D173DE4%26verified%3D1'}
-      ], 'https://portal.r2docuo.com/datobox/forms/dase');
+        {title:'PDF 1', file:'pdf1.pdf'},
+        {title:'Link v1', file:'https://testerv17.github.io/ConsultoriaT3ch/'},
+        {title:'Link v2', file:'https://berobrewing.com/products/from-am-pm-set'}
+      ], 'https://testerv17.github.io/ConsultoriaT3ch/');
     }
     function openUSPDrawer(p){
       drawerTitle.textContent = `Manual USP — ${p.name||'Punto'}`;
@@ -1038,8 +1176,173 @@ el.style.height = '54px';
       alert('🧹 Datos demo eliminados');
     });
 
-  </script>
+    // GAM: cargar puntos estáticos
+    btnLoadGAM.addEventListener('click', ()=>{
+      if (!map) return;
+      loadGamStatic();
+    });
+
+    // GAM: exportar CSV desde gamActivos
+    btnExportGAM.addEventListener('click', ()=>{
+      exportGamCSVFromArray();
+    });
+
+  
+    /****************************************
+     * 7) CAPA GAM ESTÁTICA (INMOBILIARIA)
+     ****************************************/
+    function loadGamStatic(){
+      if (!map) return;
+
+      // Construir GeoJSON en memoria a partir de gamActivos
+      const features = gamActivos.map(a => ({
+        type:'Feature',
+        geometry:{
+          type:'Point',
+          coordinates:[a.lon, a.lat]
+        },
+        properties:{
+          CODIGO:a.codigo,
+          NOMBRE:a.nombre,
+          NOMBRE_DEL_INMUEBLE:a.nombreInmueble,
+          STATUS:a.status,
+          GEOREFERENCIA:a.georeferencia
+        }
+      }));
+
+      const geojson = {
+        type:'FeatureCollection',
+        features
+      };
+
+      // Crear/actualizar source
+      if (map.getSource(state.gamSourceId)) {
+        map.getSource(state.gamSourceId).setData(geojson);
+      } else {
+        map.addSource(state.gamSourceId, {
+          type:'geojson',
+          data:geojson
+        });
+
+        // Registrar ícono personalizado GAM (solo la primera vez)
+if (!map.hasImage('gam-icon')) {
+  map.loadImage('gam1.png', (error, image) => {
+    if (error) return console.error("Error cargando gam1.png:", error);
+    map.addImage('gam-icon', image);
+  });
+}
+
+
+map.addLayer({
+  id: state.gamLayerId,
+  type: 'symbol',
+  source: state.gamSourceId,
+  layout: {
+    'icon-image': 'gam-icon',
+    'icon-size': 0.35,   // ajusta tamaño si gustas
+    'icon-anchor': 'center'
+  }
+});
+
+
+        map.on('click', state.gamLayerId, (e)=>{
+          if (!e.features || !e.features.length) return;
+          const f = e.features[0];
+          const p = f.properties || {};
+          const cod    = p.CODIGO || '';
+          const nom    = p.NOMBRE || '';
+          const nomInm = p.NOMBRE_DEL_INMUEBLE || '';
+          const status = p.STATUS || '';
+          const geo    = p.GEOREFERENCIA || '';
+
+          const html = `
+            <div class="popup-content">
+              <div class="popup-title">${nomInm || nom || cod || 'Activo GAM'}</div>
+              <div class="popup-sub">${cod ? 'Código: ' + cod : ''}</div>
+              <div class="popup-actions">
+                <div class="popup-table">
+                  <table>
+                    <tr><th>CODIGO</th><td>${cod}</td></tr>
+                    <tr><th>NOMBRE</th><td>${nom}</td></tr>
+                    <tr><th>NOMBRE DEL INMUEBLE</th><td>${nomInm}</td></tr>
+                    <tr><th>DATOS DEL ACTIVO: STATUS</th><td>${status}</td></tr>
+                    ${geo ? `<tr><th>GAM</th><td><a href="${geo}" target="_blank">Abrir este activo en GAM</a></td></tr>` : ''}
+                  </table>
+                </div>
+              </div>
+            </div>
+          `;
+
+          new mapboxgl.Popup({ offset:16, closeButton:true })
+            .setLngLat(e.lngLat)
+            .setHTML(html)
+            .addTo(map);
+        });
+
+        map.on('mouseenter', state.gamLayerId, ()=>{
+          map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', state.gamLayerId, ()=>{
+          map.getCanvas().style.cursor = '';
+        });
+      }
+
+      // Ajustar vista al conjunto de activos
+      const bounds = new mapboxgl.LngLatBounds();
+      features.forEach(f=>{
+        if (f.geometry && Array.isArray(f.geometry.coordinates)) {
+          bounds.extend(f.geometry.coordinates);
+        }
+      });
+      if (!bounds.isEmpty()) {
+        map.fitBounds(bounds, { padding:40 });
+      }
+
+      state.gamLoaded = true;
+      alert('✅ Activos GAM cargados en el mapa (dataset estático).');
+    }
+
+    function exportGamCSVFromArray(){
+      if (!gamActivos.length) {
+        alert('No hay datos GAM en el dataset estático.');
+        return;
+      }
+
+      const header = ['CODIGO','NOMBRE','NOMBRE_DEL_INMUEBLE','STATUS','LAT','LON','GEOREFERENCIA'];
+      const rows = [header.join(',')];
+
+      function csvEscape(val){
+        if (val === null || val === undefined) return '';
+        const s = String(val);
+        if (s.includes('"') || s.includes(',') || s.includes('\n')) {
+          return '"' + s.replace(/"/g, '""') + '"';
+        }
+        return s;
+      }
+
+      gamActivos.forEach(a=>{
+        const row = [
+          csvEscape(a.codigo),
+          csvEscape(a.nombre),
+          csvEscape(a.nombreInmueble),
+          csvEscape(a.status),
+          csvEscape(a.lat),
+          csvEscape(a.lon),
+          csvEscape(a.georeferencia)
+        ].join(',');
+        rows.push(row);
+      });
+
+      const blob = new Blob([rows.join('\r\n')], { type:'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'gam_activos_export.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+</script>
 </body>
 </html>
-
-
